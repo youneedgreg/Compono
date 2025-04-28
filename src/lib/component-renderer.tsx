@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type React from "react"
 import type { ComponentConfig } from "./types"
 import { Button } from "@/components/ui/button"
@@ -45,23 +46,24 @@ function renderButton(config: ComponentConfig) {
 
   if (variant.value === "outline") {
     customStyles.borderColor = config.properties.borderColor.value as string
-    if (borderWidth.value !== 1) {
+    if (typeof borderWidth.value === 'number' && borderWidth.value !== 1) {
       customStyles.borderWidth = `${borderWidth.value}px`
     }
   }
 
   // Apply custom dimensions if specified
-  if (width.value > 0) {
+  if (typeof width.value === 'number' && width.value > 0) {
     customStyles.width = `${width.value}px`
   }
 
-  if (height.value > 0) {
+  if (typeof height.value === 'number' && height.value > 0) {
     customStyles.height = `${height.value}px`
   }
 
   // Apply custom padding if specified
-  if (paddingX.value > 0 || paddingY.value > 0) {
-    customStyles.padding = `${paddingY.value > 0 ? paddingY.value : 0}px ${paddingX.value > 0 ? paddingX.value : 0}px`
+  if ((typeof paddingX.value === 'number' && paddingX.value > 0) || 
+      (typeof paddingY.value === 'number' && paddingY.value > 0)) {
+    customStyles.padding = `${typeof paddingY.value === 'number' && paddingY.value > 0 ? paddingY.value : 0}px ${typeof paddingX.value === 'number' && paddingX.value > 0 ? paddingX.value : 0}px`
   }
 
   return (
@@ -99,13 +101,13 @@ function renderCard(config: ComponentConfig) {
     <Card
       className={shadowClass}
       style={{
-        width: `${width.value}px`,
-        maxWidth: maxWidth.value > 0 ? `${maxWidth.value}px` : undefined,
-        minHeight: minHeight.value > 0 ? `${minHeight.value}px` : undefined,
+        width: typeof width.value === 'number' ? `${width.value}px` : undefined,
+        maxWidth: typeof maxWidth.value === 'number' && maxWidth.value > 0 ? `${maxWidth.value}px` : undefined,
+        minHeight: typeof minHeight.value === 'number' && minHeight.value > 0 ? `${minHeight.value}px` : undefined,
         backgroundColor: backgroundColor.value as string,
         borderColor: borderColor.value as string,
-        borderWidth: `${borderWidth.value}px`,
-        borderRadius: `${borderRadius.value}px`,
+        borderWidth: typeof borderWidth.value === 'number' ? `${borderWidth.value}px` : undefined,
+        borderRadius: typeof borderRadius.value === 'number' ? `${borderRadius.value}px` : undefined,
       }}
     >
       <CardHeader>
@@ -183,7 +185,7 @@ function renderDropdown(config: ComponentConfig) {
 }
 
 function renderTabs(config: ComponentConfig) {
-  const { defaultTab, tabItems, variant } = config.properties
+  const { defaultTab, tabItems } = config.properties
   const tabs = (tabItems.value as string).split(",").map((tab) => tab.trim())
 
   return (
