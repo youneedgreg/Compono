@@ -1,7 +1,7 @@
 "use client"
 
 import { Search } from "lucide-react"
-import type { ComponentData } from "@/lib/types"
+import type { ComponentData } from "../lib/types"
 import { useState } from "react"
 import {
   Sidebar as ShadcnSidebar,
