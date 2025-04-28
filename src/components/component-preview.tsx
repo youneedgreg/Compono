@@ -2,7 +2,7 @@
 
 import type { ComponentConfig, DeviceType } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { renderComponent } from "@/lib/component-renderer"
+import { renderComponent } from "../lib/component-renderer"
 
 interface ComponentPreviewProps {
   componentConfig: ComponentConfig
