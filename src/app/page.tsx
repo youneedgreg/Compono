@@ -5,6 +5,7 @@ import {
   DndContext,
   DragOverlay,
   DragStartEvent,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
 } from "@dnd-kit/core";
@@ -39,6 +40,8 @@ import SocialLinks from "@/components/form-builder/sidebar/socialLinks";
 import { OpenJsonDialog } from "@/components/form-builder/dialogs/open-json-dialog";
 import { useForm } from "react-hook-form";
 import { cn, getGridRows, updateColSpans } from "@/lib/utils";
+import { RenderEditorComponent } from "@/components/form-builder/helpers/render-editor-component";
+import { FormComponentModel } from "@/models/FormComponent";
 import { EditorToolbar } from "@/components/form-builder/form-components/wysiwyg/editor-toolbar";
 
 export default function FormBuilderPage() {
