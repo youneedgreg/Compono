@@ -4,6 +4,36 @@ import { FormBuilderStore, Viewports } from "@/types/form-builder.types";
 import { FormComponentModel } from "@/models/FormComponent";
 import { Editor } from "@tiptap/react";
 
+export type Viewport = "sm" | "md" | "lg";
+export type Mode = "editor" | "preview";
+export type ComponentType = "form" | "sidebar" | "button" | "card" | "dialog" | "dropdown" | "table";
+
+interface FormBuilderState {
+  viewport: Viewport;
+  mode: Mode;
+  componentType: ComponentType;
+  showJson: boolean;
+  formTitle: string;
+  components: FormComponentModel[];
+  selectedComponent: FormComponentModel | null;
+  editor: Editor | null;
+  updateViewport: (viewport: Viewport) => void;
+  updateMode: (mode: Mode) => void;
+  updateComponentType: (type: ComponentType) => void;
+  toggleJsonPreview: () => void;
+  updateFormTitle: (title: string) => void;
+  addComponent: (component: FormComponentModel) => FormComponentModel;
+  updateComponent: (
+    id: string,
+    path: string,
+    value: any,
+    shouldUpdateViewport?: boolean
+  ) => void;
+  moveComponent: (oldIndex: number, newIndex: number) => void;
+  selectComponent: (component: FormComponentModel | null) => void;
+  setEditor: (editor: Editor | null) => void;
+}
+
 const generateComponentId = (
   component: FormComponentModel,
   components: FormComponentModel[]
@@ -18,26 +48,23 @@ const generateComponentId = (
   return newId;
 };
 
-export const useFormBuilderStore = create<FormBuilderStore>()(
+export const useFormBuilderStore = create<FormBuilderState>()(
   persist(
     (set, get) => ({
+      viewport: "lg",
       mode: "editor",
-      components: [],
-      selectedRow: null,
-      selectedComponent: null,
-      viewport: "sm",
+      componentType: "form",
       showJson: false,
-      formTitle: "generatedForm",
+      formTitle: "Untitled",
+      components: [],
+      selectedComponent: null,
       editor: null,
-      enableDragging: true,
-      updateMode: (mode: "editor" | "preview") => set({ mode }),
-      updateViewport: (viewport: Viewports) => set({ viewport }),
+      updateViewport: (viewport) => set({ viewport }),
+      updateMode: (mode) => set({ mode }),
+      updateComponentType: (componentType) => set({ componentType }),
       toggleJsonPreview: () => set((state) => ({ showJson: !state.showJson })),
-      updateFormTitle: (title: string) => set({ formTitle: title }),
-      updateEnableDragging: (enableDragging: boolean) =>
-        set({ enableDragging }),
-      setEditor: (editor: Editor | null) => set({ editor }),
-      addComponent: (component: FormComponentModel) => {
+      updateFormTitle: (title) => set({ formTitle: title }),
+      addComponent: (component) => {
         const newComponent = new FormComponentModel({ ...component });
         let newId = generateComponentId(newComponent, get().components);
         newComponent.id = newId;
@@ -51,107 +78,26 @@ export const useFormBuilderStore = create<FormBuilderStore>()(
 
         return newComponent;
       },
-      removeComponent: (componentId: string) => {
-        set((state) => {
-          return {
-            components: state.components.filter(
-              (component) => component.id !== componentId
-            ),
-          };
-        });
-      },
-      updateComponent: (
-        componentId: string,
-        field: string,
-        value: any,
-        isValidForAllViewports: boolean = false
-      ) => {
-        set((state) => {
-          const updateNestedField = (
-            obj: any,
-            path: string[],
-            value: any
-          ): any => {
-            if (path.length === 1) {
-              return { ...obj, [path[0]]: value };
+      updateComponent: (id, path, value, shouldUpdateViewport = true) =>
+        set((state) => ({
+          components: state.components.map((component) => {
+            if (component.id === id) {
+              const newComponent = component.clone();
+              newComponent.setField(path, value, shouldUpdateViewport);
+              return newComponent;
             }
-            const [current, ...rest] = path;
-            return {
-              ...obj,
-              [current]: updateNestedField(obj[current] || {}, rest, value),
-            };
-          };
-
-          const fieldPath = field.split(".");
-          const viewport = state.viewport;
-          let updatedComponent = null;
-
-          return {
-            components: state.components.map((component) => {
-              if (component.id !== componentId) return component;
-
-              updatedComponent = component;
-
-              // If viewport is not 'sm', update the overrides
-              if (viewport !== "sm" && !isValidForAllViewports) {
-                const overrides =
-                  component.overrides || ({} as Record<Viewports, any>);
-                const viewportOverrides = overrides[viewport] || {};
-
-                updatedComponent = new FormComponentModel({
-                  ...component,
-                  overrides: {
-                    ...overrides,
-                    [viewport]: updateNestedField(
-                      viewportOverrides,
-                      fieldPath,
-                      value
-                    ),
-                  },
-                });
-                return updatedComponent;
-              }
-
-              // For 'sm' viewport, update the base component
-
-              const nestedField = updateNestedField(
-                component,
-                fieldPath,
-                value
-              );
-
-              updatedComponent = new FormComponentModel({
-                ...component,
-                ...nestedField,
-              });
-              return updatedComponent;
-            }),
-            selectedComponent: updatedComponent,
-          };
-        });
-      },
-      updateComponents: (components: FormComponentModel[]) =>
-        set({ components }),
-      selectComponent: (component: FormComponentModel | null) =>
-        set(() => ({
-          selectedComponent: component
-            ? new FormComponentModel(component)
-            : null,
-          editor: component === null || component.category === "form" ? null : get().editor,
+            return component;
+          }),
         })),
-      moveComponent: (oldIndex: number, newIndex: number) =>
+      moveComponent: (oldIndex, newIndex) =>
         set((state) => {
-          const components = [...state.components];
-
-          if (oldIndex === undefined) {
-            oldIndex = components.length - 1;
-          }
-
-          const [movedComponent] = components.splice(oldIndex, 1);
-          components.splice(newIndex, 0, movedComponent);
-
-          return { components, selectedComponent: movedComponent };
+          const newComponents = [...state.components];
+          const [removed] = newComponents.splice(oldIndex, 1);
+          newComponents.splice(newIndex, 0, removed);
+          return { components: newComponents };
         }),
+      selectComponent: (component) => set({ selectedComponent: component }),
+      setEditor: (editor) => set({ editor }),
     }),
     {
       name: "form-builder-storage",

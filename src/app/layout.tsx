@@ -7,14 +7,14 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    default: "Shadcn Builder - Create Beautiful Forms",
-    template: "%s | Shadcn Builder",
+    default: "Compono - Create Beautiful Forms",
+    template: "%s | Compono",
   },
   description: "Create beautiful, responsive forms with our easy-to-use form builder and generate React code using shadcn/ui components.",
   keywords: ["form builder", "online forms", "form creator", "web forms", "form designer", "form templates", "shadcn/ui", "react components", "react form builder", "shadcn form builder", "shadcn builder", "shadcn builder form", "shadcn builder form builder", "shadcn builder form templates", "shadcn builder form designer", "shadcn builder form creator", "shadcn builder form templates", "shadcn builder form designer", "shadcn builder form creator"],
-  authors: [{ name: "Igor Duspara" }],
+  authors: [{ name: "Gregory Temwa" }],
   creator: "Igor Duspara",
-  publisher: "Shadcn Builder",
+  publisher: "Compono",
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://www.shadcn-builder.com",
-    siteName: "Shadcn Builder",
-    title: "Shadcn Builder - Create Beautiful Forms",
+    siteName: "Gregory Temwa",
+    title: "Compono - Create Beautiful Forms",
     description: "Create beautiful, responsive forms with our easy-to-use form builder and generate React code using shadcn/ui components.",
     images: [
       {
