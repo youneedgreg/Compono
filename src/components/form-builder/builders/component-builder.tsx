@@ -1,5 +1,6 @@
 import { useFormBuilderStore } from "@/stores/form-builder-store";
 import { FormBuilder } from "./form-builder";
+import { CardBuilder } from "./card-builder";
 
 export function ComponentBuilder() {
   const componentType = useFormBuilderStore((state) => state.componentType);
@@ -7,9 +8,10 @@ export function ComponentBuilder() {
   switch (componentType) {
     case "form":
       return <FormBuilder />;
+    case "card":
+      return <CardBuilder />;
     case "sidebar":
     case "button":
-    case "card":
     case "dialog":
     case "dropdown":
     case "table":

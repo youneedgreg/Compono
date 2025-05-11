@@ -92,7 +92,7 @@ export default function FormBuilderPage() {
         <div className="flex flex-row gap-2 items-center justify-center md:justify-start p-2 px-4 border-r w-full md:w-[300px]">
           <BlocksIcon className="h-6 w-6" strokeWidth={2} />
           <h2 className="text-lg font-semibold">
-            shadcn/ui <span className="font-normal">Builder</span>
+            Compono
             <sup className="text-xs text-muted-foreground font-normal ml-1">
               Beta
             </sup>
