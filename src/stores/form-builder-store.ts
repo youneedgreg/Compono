@@ -17,6 +17,8 @@ interface FormBuilderState {
   components: FormComponentModel[];
   selectedComponent: FormComponentModel | null;
   editor: Editor | null;
+  enableDragging: boolean;
+  updateEnableDragging: (value: boolean) => void;
   updateViewport: (viewport: Viewport) => void;
   updateMode: (mode: Mode) => void;
   updateComponentType: (type: ComponentType) => void;
@@ -30,7 +32,9 @@ interface FormBuilderState {
     shouldUpdateViewport?: boolean
   ) => void;
   moveComponent: (oldIndex: number, newIndex: number) => void;
+  updateComponents: (components: FormComponentModel[]) => void;
   selectComponent: (component: FormComponentModel | null) => void;
+  removeComponent: (id: string) => void;
   setEditor: (editor: Editor | null) => void;
 }
 
@@ -59,6 +63,8 @@ export const useFormBuilderStore = create<FormBuilderState>()(
       components: [],
       selectedComponent: null,
       editor: null,
+      enableDragging: true,
+      updateEnableDragging: (value) => set({ enableDragging: value }),
       updateViewport: (viewport) => set({ viewport }),
       updateMode: (mode) => set({ mode }),
       updateComponentType: (componentType) => set({ componentType }),
@@ -96,7 +102,12 @@ export const useFormBuilderStore = create<FormBuilderState>()(
           newComponents.splice(newIndex, 0, removed);
           return { components: newComponents };
         }),
+      updateComponents: (components) => set({ components }),
       selectComponent: (component) => set({ selectedComponent: component }),
+      removeComponent: (id) =>
+        set((state) => ({
+          components: state.components.filter((c) => c.id !== id),
+        })),
       setEditor: (editor) => set({ editor }),
     }),
     {
