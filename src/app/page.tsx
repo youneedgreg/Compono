@@ -10,6 +10,9 @@ import {
   PlayIcon,
   XIcon,
   ExternalLink,
+  Trash2Icon,
+  UndoIcon,
+  RedoIcon,
 } from "lucide-react";
 import { PencilRulerIcon } from "lucide-react";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
@@ -49,6 +52,11 @@ export default function FormBuilderPage() {
   const updateMode = useFormBuilderStore((state) => state.updateMode);
   const updateFormTitle = useFormBuilderStore((state) => state.updateFormTitle);
   const updateComponentType = useFormBuilderStore((state) => state.updateComponentType);
+  const clearForm = useFormBuilderStore((state) => state.clearForm);
+  const undo = useFormBuilderStore((state) => state.undo);
+  const redo = useFormBuilderStore((state) => state.redo);
+  const history = useFormBuilderStore((state) => state.history);
+  const historyIndex = useFormBuilderStore((state) => state.historyIndex);
   const toggleJsonPreview = useFormBuilderStore(
     (state) => state.toggleJsonPreview
   );
@@ -87,8 +95,8 @@ export default function FormBuilderPage() {
   };
 
   return (
-    <div>
-      <div className={cn("fixed top-0 w-full flex flex-row gap-2 justify-between bg-white border-b z-30")}>
+    <div className="h-screen flex flex-col">
+      <div className={cn("flex-shrink-0 fixed top-0 w-full flex flex-row gap-2 justify-between bg-white border-b z-30")}>
         <div className="flex flex-row gap-2 items-center justify-center md:justify-start p-2 px-4 border-r w-full md:w-[300px]">
           <BlocksIcon className="h-6 w-6" strokeWidth={2} />
           <h2 className="text-lg font-semibold">
@@ -192,6 +200,32 @@ export default function FormBuilderPage() {
                 <ExternalLink className="h-4 w-4" />
                 Export
               </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="cursor-pointer flex-1"
+                onClick={() => clearForm()}
+                disabled={components.length === 0}
+              >
+                <Trash2Icon className="h-4 w-4" />
+                Clear
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => undo()}
+                disabled={historyIndex <= 0}
+              >
+                <UndoIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => redo()}
+                disabled={historyIndex >= history.length - 1}
+              >
+                <RedoIcon className="h-4 w-4" />
+              </Button>
             </>
           )}
           {mode === "preview" && (
@@ -208,23 +242,25 @@ export default function FormBuilderPage() {
         </div>
       </div>
 
-      {isMobile ? (
-        <>
-          <MobileNotification />
-          <div className="fixed bottom-0 w-full p-4 border-t">
-            <SocialLinks />
-          </div>
-        </>
-      ) : (
-        <>
-          <ComponentBuilder />
-          <GenerateCodeDialog
-            open={showCodeDialog}
-            onOpenChange={setShowCodeDialog}
-            generatedCode={generatedCode}
-          />
-        </>
-      )}
+      <main className="flex-1 overflow-y-auto pt-16">
+        {isMobile ? (
+          <>
+            <MobileNotification />
+            <div className="fixed bottom-0 w-full p-4 border-t">
+              <SocialLinks />
+            </div>
+          </>
+        ) : (
+          <>
+            <ComponentBuilder />
+            <GenerateCodeDialog
+              open={showCodeDialog}
+              onOpenChange={setShowCodeDialog}
+              generatedCode={generatedCode}
+            />
+          </>
+        )}
+      </main>
     </div>
   );
 }

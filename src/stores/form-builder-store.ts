@@ -35,7 +35,13 @@ interface FormBuilderState {
   updateComponents: (components: FormComponentModel[]) => void;
   selectComponent: (component: FormComponentModel | null) => void;
   removeComponent: (id: string) => void;
+  clearForm: () => void;
   setEditor: (editor: Editor | null) => void;
+  history: FormComponentModel[][];
+  historyIndex: number;
+  undo: () => void;
+  redo: () => void;
+  isHydrated: boolean;
 }
 
 const generateComponentId = (
@@ -52,78 +58,135 @@ const generateComponentId = (
   return newId;
 };
 
-export const useFormBuilderStore = create<FormBuilderState>()(
-  persist(
-    (set, get) => ({
-      viewport: "lg",
-      mode: "editor",
-      componentType: "form",
-      showJson: false,
-      formTitle: "Untitled",
-      components: [],
-      selectedComponent: null,
-      editor: null,
-      enableDragging: true,
-      updateEnableDragging: (value) => set({ enableDragging: value }),
-      updateViewport: (viewport) => set({ viewport }),
-      updateMode: (mode) => set({ mode }),
-      updateComponentType: (componentType) => set({ componentType }),
-      toggleJsonPreview: () => set((state) => ({ showJson: !state.showJson })),
-      updateFormTitle: (title) => set({ formTitle: title }),
-      addComponent: (component) => {
-        const newComponent = new FormComponentModel({ ...component });
-        let newId = generateComponentId(newComponent, get().components);
-        newComponent.id = newId;
-        newComponent.attributes = {
-          ...newComponent.attributes,
-          id: newComponent.id,
-        };
-        set((state) => {
-          return { components: [...state.components, newComponent] };
-        });
+export const useFormBuilderStore = create<FormBuilderState>((set, get) => {
+  const initialState = {
+    viewport: "lg" as Viewport,
+    mode: "editor" as Mode,
+    componentType: "form" as ComponentType,
+    showJson: false,
+    formTitle: "Untitled",
+    components: [],
+    selectedComponent: null,
+    editor: null,
+    enableDragging: true,
+    history: [],
+    historyIndex: -1,
+    isHydrated: false,
+  };
 
-        return newComponent;
-      },
-      updateComponent: (id, path, value, shouldUpdateViewport = true) =>
-        set((state) => ({
-          components: state.components.map((component) => {
-            if (component.id === id) {
-              const newComponent = component.clone();
-              newComponent.setField(path, value, shouldUpdateViewport);
-              return newComponent;
-            }
-            return component;
-          }),
-        })),
-      moveComponent: (oldIndex, newIndex) =>
-        set((state) => {
-          const newComponents = [...state.components];
-          const [removed] = newComponents.splice(oldIndex, 1);
-          newComponents.splice(newIndex, 0, removed);
-          return { components: newComponents };
-        }),
-      updateComponents: (components) => set({ components }),
-      selectComponent: (component) => set({ selectedComponent: component }),
-      removeComponent: (id) =>
-        set((state) => ({
-          components: state.components.filter((c) => c.id !== id),
-        })),
-      setEditor: (editor) => set({ editor }),
-    }),
-    {
-      name: "form-builder-storage",
-      partialize: (state) => ({
-        components: state.components,
-        viewport: state.viewport,
-        formTitle: state.formTitle,
+  return {
+    ...initialState,
+    updateViewport: (viewport) => set({ viewport }),
+    updateMode: (mode) => set({ mode }),
+    updateComponentType: (componentType) => set({ componentType }),
+    toggleJsonPreview: () => set((state) => ({ showJson: !state.showJson })),
+    updateFormTitle: (title) => set({ formTitle: title }),
+    updateEnableDragging: (value) => set({ enableDragging: value }),
+    addComponent: (component) => {
+      const newComponent = new FormComponentModel({ ...component });
+      let newId = generateComponentId(newComponent, get().components);
+      newComponent.id = newId;
+      newComponent.attributes = {
+        ...newComponent.attributes,
+        id: newComponent.id,
+      };
+      set((state) => {
+        const newComponents = [...state.components, newComponent];
+        const newHistory = state.history.slice(0, state.historyIndex + 1);
+        newHistory.push(newComponents);
+        return {
+          components: newComponents,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        };
+      });
+      return newComponent;
+    },
+    updateComponent: (id, path, value, shouldUpdateViewport = true) =>
+      set((state) => {
+        const newComponents = state.components.map((component) => {
+          if (component.id === id) {
+            const newComponent = component.clone();
+            newComponent.setField(path, value, shouldUpdateViewport);
+            return newComponent;
+          }
+          return component;
+        });
+        const newHistory = state.history.slice(0, state.historyIndex + 1);
+        newHistory.push(newComponents);
+        return {
+          components: newComponents,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        };
       }),
-      onRehydrateStorage: () => (state) => {
-        if (state?.components) {
-          state.components = state.components.map((component) => {
-            return new FormComponentModel(component);
-          });
+    moveComponent: (oldIndex, newIndex) =>
+      set((state) => {
+        const newComponents = [...state.components];
+        const [removed] = newComponents.splice(oldIndex, 1);
+        newComponents.splice(newIndex, 0, removed);
+        const newHistory = state.history.slice(0, state.historyIndex + 1);
+        newHistory.push(newComponents);
+        return {
+          components: newComponents,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        };
+      }),
+    updateComponents: (components) =>
+      set((state) => {
+        const newHistory = state.history.slice(0, state.historyIndex + 1);
+        newHistory.push(components);
+        return {
+          components,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        };
+      }),
+    selectComponent: (component) => set({ selectedComponent: component }),
+    removeComponent: (id) =>
+      set((state) => {
+        const newComponents = state.components.filter((c) => c.id !== id);
+        const newHistory = state.history.slice(0, state.historyIndex + 1);
+        newHistory.push(newComponents);
+        return {
+          components: newComponents,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        };
+      }),
+    clearForm: () =>
+      set((state) => {
+        const newHistory = state.history.slice(0, state.historyIndex + 1);
+        newHistory.push([]);
+        return {
+          components: [],
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        };
+      }),
+    setEditor: (editor) => set({ editor }),
+    undo: () =>
+      set((state) => {
+        if (state.historyIndex > 0) {
+          const newHistoryIndex = state.historyIndex - 1;
+          return {
+            components: state.history[newHistoryIndex],
+            historyIndex: newHistoryIndex,
+          };
         }
-      },
-    }
-  )
-);
+        return {};
+      }),
+    redo: () =>
+      set((state) => {
+        if (state.historyIndex < state.history.length - 1) {
+          const newHistoryIndex = state.historyIndex + 1;
+          return {
+            components: state.history[newHistoryIndex],
+            historyIndex: newHistoryIndex,
+          };
+        }
+        return {};
+      }),
+  };
+});
