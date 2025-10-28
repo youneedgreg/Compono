@@ -113,7 +113,28 @@ export class FormComponentModel {
     return getNestedValue(this, fieldPath);
   }
 
+  setField(path: string, value: any, shouldUpdateViewport?: boolean): void {
+    const setNestedValue = (obj: any, path: string[], value: any): any => {
+      const [current, ...rest] = path;
+      if (rest.length === 0) {
+        obj[current] = value;
+        return;
+      }
+      if (!obj[current]) {
+        obj[current] = {};
+      }
+      setNestedValue(obj[current], rest, value);
+    };
+
+    const fieldPath = path.split(".");
+    setNestedValue(this, fieldPath, value);
+  }
+
   getTWClasses(styleKey: keyof FormComponentStyles) {
     return generateTWClassesForAllViewports(this, styleKey);
+  }
+
+  clone(): FormComponentModel {
+    return new FormComponentModel(JSON.parse(JSON.stringify(this)));
   }
 }
