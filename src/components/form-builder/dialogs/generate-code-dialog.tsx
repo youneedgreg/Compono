@@ -12,9 +12,9 @@ import { Pre } from "@/components/ui/pre";
 import { Copy, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import * as prettier from "prettier/standalone";
-import * as parserTypescript from "prettier/parser-typescript";
+import parserTypescript from "prettier/parser-typescript";
 import { DependenciesImports } from "../helpers/generate-react-code";
-import * as prettierPluginEstree from "prettier/plugins/estree";
+import prettierPluginEstree from "prettier/plugins/estree";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
 
 interface GenerateCodeDialogProps {
