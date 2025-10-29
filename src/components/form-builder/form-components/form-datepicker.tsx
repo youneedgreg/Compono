@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import moment from "moment";
-import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react"
 
 import { cn, escapeHtml } from "@/lib/utils"
@@ -38,7 +37,7 @@ export function FormDatePicker(component: FormComponentModel, form: UseFormRetur
           {...field}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {field.value ? format(field.value, "PPP") : <span className="text-muted-foreground">{component.getField("attributes.placeholder")}</span>}
+          {field.value ? moment(field.value).format("MMM DD, YYYY") : <span className="text-muted-foreground">{component.getField("attributes.placeholder")}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -73,7 +72,7 @@ export function getReactCode(component: FormComponentModel): ReactCode {
           name="${escapeHtml(component.getField("attributes.name"))}"
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {field.value ? format(field.value, "PPP") : <span className="text-muted-foreground">${escapeHtml(component.getField("attributes.placeholder"))}</span>}
+          {field.value ? moment(field.value).format("MMM DD, YYYY") : <span className="text-muted-foreground">${escapeHtml(component.getField("attributes.placeholder"))}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -90,7 +89,6 @@ export function getReactCode(component: FormComponentModel): ReactCode {
       "@/components/ui/calendar": ["Calendar"],
       "@/components/ui/popover": ["Popover", "PopoverContent", "PopoverTrigger"],
 
-      "date-fns": ["format"],
       "lucide-react": ["CalendarIcon"],
     },    
   };
