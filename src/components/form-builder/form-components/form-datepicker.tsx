@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
+import moment from "moment";
+import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react"
 
 import { cn, escapeHtml } from "@/lib/utils"
