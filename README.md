@@ -55,3 +55,11 @@ Compono is built with the following technologies:
 ## Website
 
 [link](https://compono.vercel.app/)
+
+## 🧪 Experimental: Flutter Renderer
+
+Compono's builder produces a field-config schema (type/label/placeholder/required/options)
+that's currently rendered as HTML/JSX. [`flutter_preview/`](./flutter_preview) is a small
+standalone Flutter app proving the same schema renders cleanly as native widgets
+(`TextFormField`, `DropdownButtonFormField`, `CheckboxListTile`, …) — a first step
+toward a Flutter export target alongside the existing React one.
