@@ -1,0 +1,21 @@
+name: compono_flutter_preview
+description: >
+  Experimental Flutter renderer for Compono form schemas — proof-of-concept
+  for taking the same component-config JSON that drives the React/dnd-kit
+  builder and rendering it as native Flutter widgets instead of HTML.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
